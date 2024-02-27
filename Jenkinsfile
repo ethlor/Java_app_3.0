@@ -55,12 +55,13 @@ pipeline{
        }
        stage('Quality Gate Status Check : Sonarqube'){
          when { expression {  params.action == 'create' } }
-            steps{
-               script{
-                   
-                   def SonarQubecredentialsId = 'sonarqube-api'
-                   QualityGateStatus(SonarQubecredentialsId)
-               }
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    def SonarQubecredentialsId = 'sonarqube-api'
+                    waitForQualityGate abortPipeline: false, credentialsId: SonarQubecredentialsId
+                }
             }
        }
         stage('Maven Build : maven'){
